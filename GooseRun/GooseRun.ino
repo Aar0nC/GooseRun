@@ -24,8 +24,8 @@ int isPlayerDead = FALSE;
 
 void checkCollision() {
   for (int i=0; i < NUM_OBSTACLES; i++) {
-  if (((goose.x + 0.5*goose.width) == (obstacles[i].x + 0.5*obstacles[i].width)) 
-        && ((goose.y + 0.5*goose.height) == (obstacles[i].y + 0.5*obstacles[i].height))) {
+  if ((((goose.x >= obstacles[i].x - 0.5*obstacles[i].width) && (goose.x <= obstacles[i].x + 0.5*obstacles[i].width)))) && 
+          (((goose.y >= obstacles[i].y - 0.5*obstacles[i].height) && (goose.y <= obstacles[i].y + 0.5*obstacles[i].height))) {
           isPlayerDead = TRUE;
         }
   }
