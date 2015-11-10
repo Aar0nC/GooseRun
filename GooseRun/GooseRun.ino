@@ -6,6 +6,7 @@ typedef struct{
    int x, y, width, height; 
 } rect; 
 
+// Aaron Cotter Swag
 rect goose;  
 rect obstacles[NUM_OBSTACLES]; 
 
