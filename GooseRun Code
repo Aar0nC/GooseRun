@@ -168,6 +168,34 @@ void DeviceInit()
 
 }
 
+///////update map and make bumps ---> Scott
+void createBumps(){  
+   int i;
+   //random(x, y), inclusive x, exclusive y
+   for (i = 0; i < NUM_BUMPS; i++){
+       rect bump = {.x = BUMP_START_X_LOC + i * BUMP_SPACING, .y = TOP_BUMP_Y, .height = BUMP_HEIGHT, .width = random(BUMP_MIN_WIDTH, BUMP_MAX_WIDTH + 1);
+       bumps[i] = bump;
+   }  
+}
+
+void updateMap(){
+  //128 by 32
+  if (bumpsCreated == 0){//make all the bumps, only once
+      createBumps();
+      bumpsCreated = 1;     
+  }
+  
+  //move each bump each time, make sure to wrap
+  
+  int i;
+  for (i = 0; i < NUM_BUMPS; i++){
+      bumps[i].x--;
+      if (bumps[i].x + bumps[i].width <= 0){//at end left of screen
+          bumps[i].x = BUMP_DEFAULT_GO_TO_X;//set to to far right 
+      }  
+  }
+}
+
 void updateScreen() { //redraws the screen based on the new map 
   
   if (isPlayerDead == TRUE) {
