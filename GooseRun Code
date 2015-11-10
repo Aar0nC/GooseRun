@@ -178,11 +178,29 @@ void createBumps(){
        bumps[i] = bump;
    }  
 }
-
+void obstaclesToSet(){ //what sets the obstacles
+  int j; //just for the loop
+  int xMaxObstacle=4; // max width of an obstacle
+  int yMaxObstacle=INITIAL_JUMP_VELOCITY/GRAVITY*2/3; // max height of an obstacle
+  int distBetweenObstacles=12; //distance from the end of one obstacle to the start of the next
+  int distFromStart=-4; //distance from the start of the screen
+  int distCase=0;     //temporary holding of what the x value will be
+  for (j=0; j < NUM_OBSTACLES; j++){
+    distCase=distFromStart+xMaxObstacle+distBetweenObstacles;
+    rect obstacles  
+    obstacle.x=distCase;
+    obstacle.y=yMaxObstacle+GROUND_HEIGHT;
+    obstacle.height=yMaxObstacle;
+    obstacle.width=xMaxObstacle;
+    obstacles[j]=obstacle;
+}
+  
+}
 void updateMap(){
   //128 by 32
   if (bumpsCreated == 0){//make all the bumps, only once
       createBumps();
+      obstaclesToSet();
       bumpsCreated = 1;     
   }
   
