@@ -6,7 +6,6 @@ typedef struct{
    int x, y, width, height; 
 } rect; 
 
-// Aaron Cotter Swag
 rect goose;  
 rect obstacles[NUM_OBSTACLES]; 
 
@@ -23,6 +22,15 @@ int itersForUpdate = INITIAL_ITERS_FOR_UPDATE;
 int loopCount = 0; 
 int isPlayerDead = FALSE; 
 
+void checkCollision() {
+  for (int i=0; i < NUM_OBSTACLES; i++) {
+  if (((goose.x + 0.5*goose.width) == (obstacles[i].x + 0.5*obstacles[i].width)) 
+        && ((goose.y + 0.5*goose.height) == (obstacles[i].y + 0.5*obstacles[i].height))) {
+          isPlayerDead = TRUE;
+        }
+  }
+}
+
 loop {
   checkInputs(); 
   if(loopCount == itersForUpdate){
@@ -31,5 +39,5 @@ loop {
      updateScore(); 
      loopCount = -1; 
   }  
-  loopCount++; 
+  loopCount++;
 }
