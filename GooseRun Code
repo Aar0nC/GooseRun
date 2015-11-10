@@ -25,6 +25,12 @@ extern "C" {
 #define GOOSE_WIDTH 11 
 #define GOOSE_HEIGHT 16
 
+//Scott macro stuff
+#define BUMP_START_X_LOC 10
+#define BUMP_SPACING 10
+
+int bumpsCreated = FALSE;
+
 typedef struct{
    int x, y, width, height; 
 } rect; 
