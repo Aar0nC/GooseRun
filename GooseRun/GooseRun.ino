@@ -41,3 +41,14 @@ loop {
   }  
   loopCount++;
 }
+
+void  checkInputs(){
+   
+  long lBtn1; 
+  // the number of the pushbutton pin
+  lBtn1 = GPIOPinRead(BTN1Port, BTN1);
+
+  if(lBtn1 == BTN1 && yInitialVelocity == 0) {
+    yInitialVelocity = INITIAL_JUMP_VELOCITY
+  }
+}
