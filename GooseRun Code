@@ -1,0 +1,207 @@
+extern "C" {
+#include <delay.h>
+#include <FillPat.h>
+#include <I2CEEPROM.h>
+#include <LaunchPad.h>
+#include <OrbitBoosterPackDefs.h>
+#include <OrbitOled.h>
+#include <OrbitOledChar.h>
+#include <OrbitOledGrph.h>
+}
+
+#define DEMO_0		0
+#define DEMO_1		2
+#define DEMO_2		1
+#define DEMO_3		3
+#define RED_LED   GPIO_PIN_1
+#define BLUE_LED  GPIO_PIN_2
+#define GREEN_LED GPIO_PIN_3
+#define NUM_OBSTACLES 12
+#define NUM_BUMPS 16
+#define FALSE 0 
+#define TRUE 1
+#define INITIAL_JUMP_VELOCITY 10
+#define INITIAL_ITERS_FOR_UPDATE 5
+#define GOOSE_WIDTH 11 
+#define GOOSE_HEIGHT 16
+
+typedef struct{
+   int x, y, width, height; 
+} rect; 
+
+rect goose;  
+rect obstacles[NUM_OBSTACLES];
+rect bumps[NUM_BUMPS];
+
+
+
+int yInitialVelocity = 0; //this is plugged into the kinematic equation
+ 
+
+int timeSinceJump = 0;
+int score = 0;
+int itersForUpdate = INITIAL_ITERS_FOR_UPDATE; 
+int loopCount = 0; 
+int isPlayerDead = FALSE; 
+
+void DeviceInit();
+void updateMap();
+void checkInputs();
+void checkCollision(); 
+void updateScore(); 
+
+char gooseSprite[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xFE, 0x86, 0x04,
+  0x04, 0x0E, 0x0E, 0x0F, 0x0F, 0xFF, 0x8F, 0x0F, 0xFF, 0x8F, 0x07
+};
+
+char	chSwtCur;
+char	chSwtPrev;
+bool	fClearOled;
+
+void setup()
+{
+  // put your setup code here, to run once:
+  DeviceInit();
+}
+
+void DeviceInit()
+{
+  /*
+   * First, Set Up the Clock.
+   * Main OSC		  -> SYSCTL_OSC_MAIN
+   * Runs off 16MHz clock -> SYSCTL_XTAL_16MHZ
+   * Use PLL		  -> SYSCTL_USE_PLL
+   * Divide by 4	  -> SYSCTL_SYSDIV_4
+   */
+  SysCtlClockSet(SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ | SYSCTL_USE_PLL | SYSCTL_SYSDIV_4);
+
+  /*
+   * Enable and Power On All GPIO Ports
+   */
+  //SysCtlPeripheralEnable(	SYSCTL_PERIPH_GPIOA | SYSCTL_PERIPH_GPIOB | SYSCTL_PERIPH_GPIOC |
+  //						SYSCTL_PERIPH_GPIOD | SYSCTL_PERIPH_GPIOE | SYSCTL_PERIPH_GPIOF);
+
+  SysCtlPeripheralEnable(	SYSCTL_PERIPH_GPIOA );
+  SysCtlPeripheralEnable(	SYSCTL_PERIPH_GPIOB );
+  SysCtlPeripheralEnable(	SYSCTL_PERIPH_GPIOC );
+  SysCtlPeripheralEnable(	SYSCTL_PERIPH_GPIOD );
+  SysCtlPeripheralEnable(	SYSCTL_PERIPH_GPIOE );
+  SysCtlPeripheralEnable(	SYSCTL_PERIPH_GPIOF );
+  /*
+   * Pad Configure.. Setting as per the Button Pullups on
+   * the Launch pad (active low).. changing to pulldowns for Orbit
+   */
+  GPIOPadConfigSet(SWTPort, SWT1 | SWT2, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
+
+  GPIOPadConfigSet(BTN1Port, BTN1, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
+  GPIOPadConfigSet(BTN2Port, BTN2, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
+
+  GPIOPadConfigSet(LED1Port, LED1, GPIO_STRENGTH_8MA_SC, GPIO_PIN_TYPE_STD);
+  GPIOPadConfigSet(LED2Port, LED2, GPIO_STRENGTH_8MA_SC, GPIO_PIN_TYPE_STD);
+  GPIOPadConfigSet(LED3Port, LED3, GPIO_STRENGTH_8MA_SC, GPIO_PIN_TYPE_STD);
+  GPIOPadConfigSet(LED4Port, LED4, GPIO_STRENGTH_8MA_SC, GPIO_PIN_TYPE_STD);
+
+  /*
+   * Initialize Switches as Input
+   */
+  GPIOPinTypeGPIOInput(SWTPort, SWT1 | SWT2);
+
+  /*
+   * Initialize Buttons as Input
+   */
+  GPIOPinTypeGPIOInput(BTN1Port, BTN1);
+  GPIOPinTypeGPIOInput(BTN2Port, BTN2);
+
+  /*
+   * Initialize LEDs as Output
+   */
+  GPIOPinTypeGPIOOutput(LED1Port, LED1);
+  GPIOPinTypeGPIOOutput(LED2Port, LED2);
+  GPIOPinTypeGPIOOutput(LED3Port, LED3);
+  GPIOPinTypeGPIOOutput(LED4Port, LED4);
+
+  /*
+   * Enable ADC Periph
+   */
+  SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+
+  GPIOPinTypeADC(AINPort, AIN);
+
+  /*
+   * Enable ADC with this Sequence
+   * 1. ADCSequenceConfigure()
+   * 2. ADCSequenceStepConfigure()
+   * 3. ADCSequenceEnable()
+   * 4. ADCProcessorTrigger();
+   * 5. Wait for sample sequence ADCIntStatus();
+   * 6. Read From ADC
+   */
+  ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_PROCESSOR, 0);
+  ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0);
+  ADCSequenceEnable(ADC0_BASE, 0);
+
+  /*
+   * Initialize the OLED
+   */
+  OrbitOledInit();
+
+  /*
+   * Reset flags
+   */
+  chSwtCur = 0;
+  chSwtPrev = 0;
+  fClearOled = true;
+
+}
+
+void updateScreen() { //redraws the screen based on the new map 
+  
+  if (isPlayerDead == TRUE) {
+      OrbitOledSetCursor(10, 3);
+      OrbitOledPutString("You suck at this game you big dumbo"); //i wish i could come up with chirps this good 
+      OrbitOledUpdate();
+      return;
+  }
+  
+  for (int i = 0; i < NUM_OBSTACLES; i++) { //draw the obstacles
+     OrbitOledMoveTo(obstacles[i].x, obstacles[i].y);
+     OrbitOledFillRect(obstacles[i].width, obstacles[i].height);
+  }
+  for (int i = 0; i < NUM_BUMPS; i++) { //draw the bumps
+     OrbitOledMoveTo(bumps[i].x, bumps[i].y);
+     OrbitOledFillRect(bumps[i].width, bumps[i].height);
+  }
+   OrbitOledMoveTo(goose.x, goose.y); //draw the goose
+   OrbitOledPutBmp(GOOSE_WIDTH, GOOSE_HEIGHT, gooseSprite);
+   
+   OrbitOledSetCursor(2, 2);
+   OrbitOledPutString("Score: ");
+   int scoreHold = score;
+   while (scoreHold > 0) {
+      OrbitOledPutChar(scoreHold % 10 + 48);
+     scoreHold /= 10; 
+   }
+   OrbitOledUpdate();
+ }
+
+void checkCollision() {
+  for (int i=0; i < NUM_OBSTACLES; i++) {
+  if ((((goose.x >= obstacles[i].x - 0.5*obstacles[i].width) && (goose.x <= obstacles[i].x + 0.5*obstacles[i].width)))) && 
+          (((goose.y >= obstacles[i].y - 0.5*obstacles[i].height) && (goose.y <= obstacles[i].y + 0.5*obstacles[i].height))) {
+          isPlayerDead = TRUE;
+        }
+  }
+}
+
+
+void loop() {
+  checkInputs(); 
+  if(loopCount == itersForUpdate){
+     updateMap(); 
+     checkCollision(); 
+     updateScore(); 
+     loopCount = -1; 
+  }  
+  loopCount++; 
+}
