@@ -26,8 +26,12 @@ extern "C" {
 #define GOOSE_HEIGHT 16
 
 //Scott macro stuff
-#define BUMP_START_X_LOC 10
-#define BUMP_SPACING 10
+#define BUMP_SPACING 10//all used by createBumps() function
+#define BUMP_MIN_WIDTH 1
+#define BUMP_MAX_WIDTH 3
+#define GROUND_HEIGHT 4
+#define BUMP_HEIGHT 1
+#define TOP_BUMP_Y GROUND_HEIGHT+BUMP_HEIGHT
 
 int bumpsCreated = FALSE;
 
