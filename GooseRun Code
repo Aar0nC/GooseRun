@@ -34,6 +34,7 @@ extern "C" {
 #define BUMP_MAX_WIDTH 3
 #define GROUND_HEIGHT 4
 #define BUMP_HEIGHT 1
+#define BUMP_RANDOM_SPACING 4
 #define TOP_BUMP_Y MAP_HEIGHT-(GROUND_HEIGHT+BUMP_HEIGHT)
 #define BUMP_DEFAULT_GO_TO_X 133;
 int bumpsCreated = FALSE;
