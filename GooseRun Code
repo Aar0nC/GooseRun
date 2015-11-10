@@ -21,9 +21,12 @@ extern "C" {
 #define FALSE 0 
 #define TRUE 1
 #define INITIAL_JUMP_VELOCITY 10
+#define GRAVITY 10
 #define INITIAL_ITERS_FOR_UPDATE 5
 #define GOOSE_WIDTH 11 
 #define GOOSE_HEIGHT 16
+#define MAP_HEIGHT 32
+#define MAP_WIDTH 128
 
 //Scott macro stuff
 #define BUMP_SPACING 10//all used by createBumps() function
@@ -31,8 +34,8 @@ extern "C" {
 #define BUMP_MAX_WIDTH 3
 #define GROUND_HEIGHT 4
 #define BUMP_HEIGHT 1
-#define TOP_BUMP_Y GROUND_HEIGHT+BUMP_HEIGHT
-
+#define TOP_BUMP_Y MAP_HEIGHT-(GROUND_HEIGHT+BUMP_HEIGHT)
+#define BUMP_DEFAULT_GO_TO_X 133;
 int bumpsCreated = FALSE;
 
 typedef struct{
