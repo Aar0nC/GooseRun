@@ -85,6 +85,7 @@ int itersForUpdate = INITIAL_ITERS_FOR_UPDATE;
 int loopCount = 0; 
 int isPlayerDead = FALSE;
 int isPlayerInAir = FALSE;
+int gameStartCount = 1;
 
 // Flying energy int
 int flyingEnergy = 100;
@@ -114,14 +115,10 @@ void setup()
 {
   // put your setup code here, to run once:
   DeviceInit();
-  createBumps();
-  createObstacles();
   goose.x = DEFAULT_GOOSE_X;
   goose.height = GOOSE_HEIGHT;
   goose.width = GOOSE_WIDTH;
   itersForUpdate = INITIAL_ITERS_FOR_UPDATE;
-  //Serial.begin(9600);
-  randomSeed(analogRead(42));
 }
 
 void DeviceInit()
@@ -351,7 +348,15 @@ void checkCollision() {
 
 
 void loop() {
-
+   if (gameStartCount != 0) {
+     if (GPIOPinRead(BTN1Port, BTN1) == BTN1) {
+       randomSeed(gameStartCount);
+       gameStartCount == -1; 
+       createBumps();
+       createObstacles();
+     }
+     gameStartCount++;
+  }
   checkInputs(); 
   if(loopCount == itersForUpdate){//10000
      updateMap(); 
