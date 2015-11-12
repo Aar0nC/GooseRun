@@ -365,9 +365,26 @@ void loop() {
 }
 
 void checkInputs(){
-   
-  long button1; 
-  long button2;
+  //buttons on the Tiva C 'baseboard' 
+  const int buttonPin1 = PUSH1; 
+  const int buttonPin2 = PUSH2; 
+  pinMode(buttonPin1, INPUT_PULLUP); 
+  pinMode(buttonPin2, INPUT_PULLUP); 
+  int buttonState1 = 0, buttonState2 = 0; 
+  buttonState1 = digitalRead(buttonPin1);  
+  buttonState2 = digitalRead(buttonPin2); 
+  if(buttonState1 == HIGH || buttonState2 == HIGH){
+      yInitialVelocity = INITIAL_JUMP_VELOCITY;
+      timeSinceJump = 0;
+      isPlayerInAir = TRUE;
+      isFlying = TRUE; 
+  }
+  if((buttonState1 == HIGH || buttonState2 = HIGH) && isPlayerInAir == FALSE){
+     isFlying = FALSE; 
+  }
+  
+  //buttons on the Orbit Booster Pack
+  long button1, button2 
   // the number of the pushbutton pin
   button1 = GPIOPinRead(BTN1Port, BTN1);
   button2 = GPIOPinRead(BTN2Port, BTN2);
@@ -376,11 +393,22 @@ void checkInputs(){
       yInitialVelocity = INITIAL_JUMP_VELOCITY;
       timeSinceJump = 0;
       isPlayerInAir = TRUE;
-      isFlying = TRUE;
+      isFlying = TRUE; 
+   }
+   if ((button1 != BTN1 || button2 != BTN2) && isPlayerInAir == TRUE){
+     isFlying = FALSE;
+   }
+  //Putting lives on the led's on the Orbit Booster Pack 
+  if(lives == START_NUM_LIVES){
+    GPIOPinWrite(LED1Port, LED1, LED1);
+    GPIOPinWrite(LED2Port, LED2, LED2);
+    GPIOPinWrite(LED3Port, LED3, LED3);
   }
-  
-  if ((button1 != BTN1 || button2 != BTN2) && isPlayerInAir == TRUE)
-    isFlying = FALSE;
-  
+  else if(lives == START_NUM_LIVES - 1){
+    GPIOPinWrite(LED1Port, LED2, LED2);
+    GPIOPinWrite(LED2Port, LED3, LED3);
+  }
+  else if(lives == START_NUM_LIVES - 2){
+    GPIOPinWrite(LED1Port, LED3, LED3);
+  }
 }
-
