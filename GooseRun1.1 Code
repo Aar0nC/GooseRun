@@ -27,7 +27,7 @@ Iextern "C" {
 #define GOOSE_HEIGHT 10
 #define GOOSE_HEIGHT_BMP 16
 #define DEFAULT_GOOSE_X 4
-#define WAIT_TIME_BETWEEN_COLLISIONS 180000
+#define WAIT_TIME_BETWEEN_COLLISIONS 100000
 int timeSinceLastCollision = 0;
 
 
@@ -278,7 +278,7 @@ void updateScreen() { //redraws the screen based on the new map
   if (numLives == 0){
       OrbitOledClearBuffer();
       OrbitOledSetCursor(0, 0);
-      OrbitOledPutString("You suck at this game you big dumbo"); //i wish i could come up with chirps this good 
+      OrbitOledPutString("  You suck at    this game you     big dumbo"); //i wish i could come up with chirps this good  
       OrbitOledUpdate();
       return;
   }
