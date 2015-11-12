@@ -9,10 +9,6 @@ extern "C" {
 #include <OrbitOledGrph.h>
 }
 
-#define DEMO_0    0
-#define DEMO_1    2
-#define DEMO_2    1
-#define DEMO_3    3
 #define RED_LED   GPIO_PIN_1
 #define BLUE_LED  GPIO_PIN_2
 #define GREEN_LED GPIO_PIN_3
