@@ -121,7 +121,7 @@ void setup()
   goose.width = GOOSE_WIDTH;
   itersForUpdate = INITIAL_ITERS_FOR_UPDATE;
   //Serial.begin(9600);
-  randomSeed(analogRead(A0));
+  randomSeed(analogRead(42));
 }
 
 void DeviceInit()
@@ -269,9 +269,8 @@ void updateMap(){
 
 
 
-
-  if (isFlying == FALSE) 
-    goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - GRAVITY_MULTIPLIER* timeSinceJump * timeSinceJump);
+ 
+    goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - (GRAVITY_MULTIPLIER - GRAVITY_MULTIPLIER*isFlying )* timeSinceJump * timeSinceJump);
   if (goose.y + goose.height > MAP_HEIGHT - GROUND_HEIGHT) {
     goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height;
     timeSinceJump = 0;
@@ -280,10 +279,11 @@ void updateMap(){
   }
   
   if (isPlayerInAir == TRUE) {
-    if (isFlying == FALSE)
       timeSinceJump++; 
-    else
+    if (isFlying == TRUE)
       flyingEnergy -= ENERGY_LOSE_DELAY;
+    else
+      flyingEnergy += ENERGY_GAIN_DELAY;
   }
 }
 
@@ -379,7 +379,7 @@ void checkInputs(){
       isFlying = TRUE;
   }
   
-  if ((button1 != BTN1 || button2 != BTN2) && isPlayerInAir == TRUE)
+  if ((button1 != BTN1 && button2 != BTN2) && isPlayerInAir == TRUE)
     isFlying = FALSE;
   
 }
