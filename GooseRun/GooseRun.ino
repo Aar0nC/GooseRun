@@ -23,11 +23,13 @@ Iextern "C" {
 #define GRAVITY 10
 #define INITIAL_ITERS_FOR_UPDATE 10000
 #define START_NUM_LIVES 3
-#define GOOSE_WIDTH 11
-#define GOOSE_HEIGHT 16
+#define GOOSE_WIDTH 7
+#define GOOSE_HEIGHT 10
+#define GOOSE_HEIGHT_BMP 16
 #define DEFAULT_GOOSE_X 4
-#define WAIT_TIME_BETWEEN_COLLISIONS 180000
+#define WAIT_TIME_BETWEEN_COLLISIONS 100000
 int timeSinceLastCollision = 0;
+
 
 #define MAP_HEIGHT 32
 #define MAP_WIDTH 128
@@ -41,7 +43,6 @@ int isFlying = FALSE;
 //(timeSinceJump * 2.6 - 0.12 * timeSinceJump * timeSinceJump);
 #define INITIAL_JUMP_VELOCITY 2.9
 #define GRAVITY_MULTIPLIER 0.12
-#define LOOP_COUNT_REACH_ME_VALUE 10000
 
 //SPENCER MACRO
 #define OBSTACLE_SPACING  30
@@ -58,7 +59,7 @@ int obstacleSpacing = 700;
 #define BUMP_SPACING 10//all used by createBumps() function
 #define BUMP_MIN_WIDTH 1
 #define BUMP_MAX_WIDTH 3
-#define GROUND_HEIGHT 2
+#define GROUND_HEIGHT 1
 #define BUMP_HEIGHT 1
 #define BUMP_START_X_LOC 10
 #define TOP_BUMP_Y MAP_HEIGHT-(GROUND_HEIGHT+BUMP_HEIGHT)
@@ -96,9 +97,13 @@ void updateScore();
 void createBumps();
 void setObstacles();
 
-char gooseSprite[] = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xFE, 0x86, 0x04,
+/*char gooseSprite[] = {
+  0x40, 0x60, 0xF0, 0x70, 0xFF, 0x73, 0x02, 0x80, 0xFE, 0x86, 0x04,
   0x04, 0x0E, 0x0E, 0x0F, 0x0F, 0xFF, 0x8F, 0x0F, 0xFF, 0x8F, 0x07
+};*/
+char gooseSprite[] = {
+  0x40, 0x60, 0xF0, 0x70, 0xFF, 0x73, 0x02,
+  0x00, 0x00, 0x03, 0x00, 0x03, 0x00, 0x00,
 };
 
 char  chSwtCur;
@@ -114,6 +119,9 @@ void setup()
   goose.x = DEFAULT_GOOSE_X;
   goose.height = GOOSE_HEIGHT;
   goose.width = GOOSE_WIDTH;
+  itersForUpdate = INITIAL_ITERS_FOR_UPDATE;
+  //Serial.begin(9600);
+  randomSeed(analogRead(A0));
 }
 
 void DeviceInit()
@@ -260,9 +268,8 @@ void updateMap(){
   }
 
 
-
-  if (isFlying == FALSE) 
-    goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - GRAVITY_MULTIPLIER* timeSinceJump * timeSinceJump);
+ 
+  goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - GRAVITY_MULTIPLIER* timeSinceJump * timeSinceJump);
   if (goose.y + goose.height > MAP_HEIGHT - GROUND_HEIGHT) {
     goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height;
     timeSinceJump = 0;
@@ -280,8 +287,9 @@ void updateMap(){
 
 void updateScreen() { //redraws the screen based on the new map 
   if (numLives == 0){
-      OrbitOledSetCursor(0, 1);
-      OrbitOledPutString("You suck at this game you big dumbo"); //i wish i could come up with chirps this good 
+      OrbitOledClearBuffer();
+      OrbitOledSetCursor(0, 0);
+      OrbitOledPutString("  You suck at    this game you     big dumbo"); //i wish i could come up with chirps this good  
       OrbitOledUpdate();
       return;
   }
@@ -300,7 +308,7 @@ void updateScreen() { //redraws the screen based on the new map
      OrbitOledFillRect(bumps[i].x + bumps[i].width, bumps[i].y + bumps[i].height);
   }
    OrbitOledMoveTo(goose.x, goose.y); //draw the goose
-   OrbitOledPutBmp(GOOSE_WIDTH, GOOSE_HEIGHT, gooseSprite);
+   OrbitOledPutBmp(GOOSE_WIDTH, GOOSE_HEIGHT_BMP, gooseSprite);
    
    OrbitOledSetCursor(15, 0);
    if (score == 0) OrbitOledPutChar('0');
@@ -343,7 +351,7 @@ void checkCollision() {
 void loop() {
 
   checkInputs(); 
-  if(loopCount == LOOP_COUNT_REACH_ME_VALUE){//10000
+  if(loopCount == itersForUpdate){//10000
      updateMap(); 
      checkCollision(); 
      updateScreen(); 
