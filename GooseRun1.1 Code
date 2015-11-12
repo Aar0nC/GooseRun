@@ -34,6 +34,11 @@ int timeSinceLastCollision = 0;
 #define MAP_HEIGHT 32
 #define MAP_WIDTH 128
 
+// Aman macros for flying
+#define ENERGY_LOSE_DELAY 5
+#define ENERGY_GAIN_DELAY 20
+int isFlying = FALSE;
+
 //Ethan macro stuff for jumping
 //(timeSinceJump * 2.6 - 0.12 * timeSinceJump * timeSinceJump);
 #define INITIAL_JUMP_VELOCITY 2.9
@@ -80,6 +85,9 @@ int itersForUpdate = INITIAL_ITERS_FOR_UPDATE;
 int loopCount = 0; 
 int isPlayerDead = FALSE;
 int isPlayerInAir = FALSE;
+
+// Flying energy int
+int flyingEnergy = 100;
 
 void DeviceInit();
 void updateMap();
@@ -261,7 +269,9 @@ void updateMap(){
 
 
 
-  goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - GRAVITY_MULTIPLIER* timeSinceJump * timeSinceJump);
+
+  if (isFlying == FALSE) 
+    goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - GRAVITY_MULTIPLIER* timeSinceJump * timeSinceJump);
   if (goose.y + goose.height > MAP_HEIGHT - GROUND_HEIGHT) {
     goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height;
     timeSinceJump = 0;
@@ -270,7 +280,10 @@ void updateMap(){
   }
   
   if (isPlayerInAir == TRUE) {
-    timeSinceJump++; 
+    if (button1 != BTN1 || button2 != BTN2)
+      timeSinceJump++; 
+    else
+      flyingEnergy -= ENERGY_LOSE_DELAY;
   }
 }
 
@@ -354,13 +367,20 @@ void loop() {
 void checkInputs(){
    
   long button1; 
+  long button2;
   // the number of the pushbutton pin
   button1 = GPIOPinRead(BTN1Port, BTN1);
+  button2 = GPIOPinRead(BTN2Port, BTN2);
 
-  if (button1 == BTN1 && isPlayerInAir == FALSE) {
+  if ((button1 == BTN1 || button2 == BTN2) && isPlayerInAir == FALSE) {
       yInitialVelocity = INITIAL_JUMP_VELOCITY;
       timeSinceJump = 0;
       isPlayerInAir = TRUE;
+      isFlying = TRUE;
   }
+  
+  if ((button1 != BTN1 || button2 != BTN2) && isPlayerInAir == TRUE)
+    isFlying = FALSE;
+  
 }
 
