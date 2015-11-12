@@ -113,12 +113,17 @@ bool  fClearOled;
 
 void setup()
 {
-  // put your setup code here, to run once:
   DeviceInit();
   goose.x = DEFAULT_GOOSE_X;
+  goose.y = MAP_HEIGHT - GROUND_HEIGHT - GOOSE_HEIGHT;
   goose.height = GOOSE_HEIGHT;
   goose.width = GOOSE_WIDTH;
   itersForUpdate = INITIAL_ITERS_FOR_UPDATE;
+   
+  OrbitOledSetCursor(0, 2);
+  OrbitOledPutString("Press any button to start");
+  
+  OrbitOledUpdate();
 }
 
 void DeviceInit()
@@ -351,11 +356,12 @@ void loop() {
    if (gameStartCount != 0) {
      if (GPIOPinRead(BTN1Port, BTN1) == BTN1) {
        randomSeed(gameStartCount);
-       gameStartCount == -1; 
+       gameStartCount = -1; 
        createBumps();
        createObstacles();
      }
      gameStartCount++;
+     return;
   }
   checkInputs(); 
   if(loopCount == itersForUpdate){//10000
