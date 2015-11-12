@@ -1,4 +1,4 @@
-Iextern "C" {
+extern "C" {
 #include <delay.h>
 #include <FillPat.h>
 #include <I2CEEPROM.h>
