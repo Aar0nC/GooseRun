@@ -280,7 +280,7 @@ void updateMap(){
   }
   
   if (isPlayerInAir == TRUE) {
-    if (button1 != BTN1 || button2 != BTN2)
+    if (isFlying == FALSE)
       timeSinceJump++; 
     else
       flyingEnergy -= ENERGY_LOSE_DELAY;

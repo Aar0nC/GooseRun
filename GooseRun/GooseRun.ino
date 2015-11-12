@@ -268,8 +268,10 @@ void updateMap(){
   }
 
 
- 
-  goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - GRAVITY_MULTIPLIER* timeSinceJump * timeSinceJump);
+
+
+  if (isFlying == FALSE) 
+    goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - GRAVITY_MULTIPLIER* timeSinceJump * timeSinceJump);
   if (goose.y + goose.height > MAP_HEIGHT - GROUND_HEIGHT) {
     goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height;
     timeSinceJump = 0;
@@ -278,7 +280,7 @@ void updateMap(){
   }
   
   if (isPlayerInAir == TRUE) {
-    if (button1 != BTN1 || button2 != BTN2)
+    if (isFlying == FALSE)
       timeSinceJump++; 
     else
       flyingEnergy -= ENERGY_LOSE_DELAY;
