@@ -30,6 +30,9 @@ int itersPerUpdate = INITIAL_ITERS_FOR_UPDATE;
 #define DEFAULT_GOOSE_X 4
 #define WAIT_TIME_BETWEEN_COLLISIONS INITIAL_ITERS_FOR_UPDATE*11
 int timeSinceLastCollision = 0;
+#define ENERGY_BAR_WIDTH 30
+#define ENERGY_BAR_HEIGHT 4
+#define CURSOR_WIDTH 16
 
 
 #define MAP_HEIGHT 32
@@ -38,6 +41,9 @@ int timeSinceLastCollision = 0;
 // Aman macros for flying
 #define ENERGY_LOSE_RATE 20
 #define ENERGY_GAIN_RATE ENERGY_LOSE_RATE/4
+#define MAX_FLYING_ENERGY 10000
+
+int flyingEnergy = MAX_FLYING_ENERGY;
 int isFlying = FALSE;
 
 //Ethan macro stuff for jumping
@@ -89,7 +95,6 @@ int isPlayerInAir = FALSE;
 int gameStartCount = 1;
 
 // Flying energy int
-int flyingEnergy = 10000;
 
 void DeviceInit();
 void updateMap();
@@ -254,13 +259,7 @@ void createBumps(){
 }
 
 void updateMap(){
-  //128 by 32
- // if (bumpsCreated == 0){//make all the bumps, only once
- //     createBumps();
- //     bumpsCreated = 1;     
- // }
-  
-  //move each bump each time, make sure to wrap
+//move each bump each time, make sure to wrap
   
   int i;
   //move bumps to the left
@@ -305,7 +304,7 @@ void updateMap(){
       flyingEnergy -= ENERGY_LOSE_RATE;
     }   
   }
-  if (isPlayerInAir == FALSE || isFlying == FALSE){
+  if ((isPlayerInAir == FALSE || isFlying == FALSE) && flyingEnergy < MAX_FLYING_ENERGY){
       flyingEnergy += ENERGY_GAIN_RATE;
 
   }
@@ -336,16 +335,26 @@ void updateScreen() { //redraws the screen based on the new map
    OrbitOledMoveTo(goose.x, goose.y); //draw the goose
    OrbitOledPutBmp(GOOSE_WIDTH, GOOSE_HEIGHT_BMP, gooseSprite);
    
+   int numDigits = 1;
+   
    OrbitOledSetCursor(15, 0);
    if (score == 0) OrbitOledPutChar('0');
    else {
      int scoreHold = score, cursorCount = 15;
+     numDigits = 0;
      while (scoreHold > 0) {
        OrbitOledPutChar(scoreHold % 10 + 48);
        scoreHold /= 10;
        OrbitOledSetCursor(cursorCount--, 0);
+       numDigits++;
      }
    }
+   
+   OrbitOledMoveTo(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH, 1);
+   OrbitOledDrawRect(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2, 1 + ENERGY_BAR_HEIGHT);
+   
+   OrbitOledMoveTo(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH, 1);
+   OrbitOledFillRect(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH + ENERGY_BAR_WIDTH * flyingEnergy / MAX_FLYING_ENERGY, 1 + ENERGY_BAR_HEIGHT);
    
    OrbitOledUpdate();
  }
@@ -402,15 +411,6 @@ void checkIfChangeInSpeed(){
   speedMultiplier =  1;
 
 }
-
-
-
-
-
-
-
-
-
 
 ////change in speed attempt end
 //double speedMultiplier = 1.0;
