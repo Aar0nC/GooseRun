@@ -32,7 +32,7 @@ int itersPerUpdate = INITIAL_ITERS_FOR_UPDATE;
 int timeSinceLastCollision = 0;
 #define ENERGY_BAR_WIDTH 30
 #define ENERGY_BAR_HEIGHT 4
-#define CURSOR_WIDTH 16
+#define CURSOR_WIDTH 6
 
 
 #define MAP_HEIGHT 32
@@ -48,8 +48,8 @@ int isFlying = FALSE;
 
 //Ethan macro stuff for jumping
 //(timeSinceJump * 2.6 - 0.12 * timeSinceJump * timeSinceJump);
-#define INITIAL_JUMP_VELOCITY 3.1
-#define GRAVITY_MULTIPLIER 0.12
+#define INITIAL_JUMP_VELOCITY 1.8//3.1
+#define GRAVITY_MULTIPLIER 0.045//0.12
 
 //SPENCER MACRO
 #define OBSTACLE_SPACING  30
@@ -278,7 +278,7 @@ void updateMap(){
     }
   }
   
-  if (isFlying == TRUE && goose.y == 1 && flyingEnergy > 0){
+  if (isFlying == TRUE && goose.y <= 1 && flyingEnergy > 0){
     timeSinceJump--;
   } else {
   goose.y = MAP_HEIGHT - GROUND_HEIGHT - goose.height - (timeSinceJump * INITIAL_JUMP_VELOCITY - (GRAVITY_MULTIPLIER )* timeSinceJump * timeSinceJump);
@@ -319,9 +319,33 @@ void updateScreen() { //redraws the screen based on the new map
       return;
   }
   
-  OrbitOledClearBuffer();
+   int numDigits = 1;
+   int digits[16] = {0};
+   
+   OrbitOledSetCursor(15, 0);
+   if (score == 0) OrbitOledPutChar('0');
+   else {
+     int scoreHold = score;
+     numDigits = 0;
+     while (scoreHold > 0) {
+       digits[numDigits] = scoreHold % 10;
+       scoreHold /= 10;
+       numDigits++;
+     }
+   }
+   
+   OrbitOledClearBuffer();
+
+  
   OrbitOledMoveTo(0, MAP_HEIGHT - GROUND_HEIGHT);
   OrbitOledFillRect(MAP_WIDTH, MAP_HEIGHT);
+  
+     
+   OrbitOledMoveTo(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH, 1);
+   OrbitOledDrawRect(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2, 1 + ENERGY_BAR_HEIGHT);
+   
+   OrbitOledMoveTo(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH, 1);
+   OrbitOledFillRect(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH + ENERGY_BAR_WIDTH * max(flyingEnergy, 0) / MAX_FLYING_ENERGY, 1 + ENERGY_BAR_HEIGHT);
   
   OrbitOledSetFillPattern(OrbitOledGetStdPattern(1));
   for (int i = 0; i < NUM_OBSTACLES; i++) { //draw the obstacles
@@ -335,27 +359,13 @@ void updateScreen() { //redraws the screen based on the new map
    OrbitOledMoveTo(goose.x, goose.y); //draw the goose
    OrbitOledPutBmp(GOOSE_WIDTH, GOOSE_HEIGHT_BMP, gooseSprite);
    
-   int numDigits = 1;
-   
-   OrbitOledSetCursor(15, 0);
-   if (score == 0) OrbitOledPutChar('0');
-   else {
-     int scoreHold = score, cursorCount = 15;
-     numDigits = 0;
-     while (scoreHold > 0) {
-       OrbitOledPutChar(scoreHold % 10 + 48);
-       scoreHold /= 10;
-       OrbitOledSetCursor(cursorCount--, 0);
-       numDigits++;
-     }
+   if (score != 0) {
+   OrbitOledSetCursor(17-numDigits, 0);
+   for (int i = numDigits-1; i > 0; i--) {
+      OrbitOledPutChar(digits[i] + 48);
    }
-   
-   OrbitOledMoveTo(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH, 1);
-   OrbitOledDrawRect(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2, 1 + ENERGY_BAR_HEIGHT);
-   
-   OrbitOledMoveTo(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH, 1);
-   OrbitOledFillRect(MAP_WIDTH - numDigits * CURSOR_WIDTH - 2 - ENERGY_BAR_WIDTH + ENERGY_BAR_WIDTH * flyingEnergy / MAX_FLYING_ENERGY, 1 + ENERGY_BAR_HEIGHT);
-   
+   }
+
    OrbitOledUpdate();
  }
 
