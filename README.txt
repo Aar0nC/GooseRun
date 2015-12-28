@@ -1,2 +1,9 @@
-Hey guys, creating the repo for SE101 GooseRun. It should be private, 
-let me know if it isn't
+Hey guys, creating the repo for GooseRun. 
+
+Project finished, list of features: 
+-randomly generated map
+-animated sprite
+-lives with LED's on Orbit pack
+-flying mode
+-energy bar
+-scoreboard
