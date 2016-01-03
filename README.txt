@@ -7,3 +7,10 @@ Project finished, list of features:
 -flying mode
 -energy bar
 -scoreboard
+
+Contributors: 
+Ethan Hardy
+Scott Sandre
+Aaron Cotter
+Spencer Dobrik 
+Aman Dureja
